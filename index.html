@@ -406,7 +406,7 @@ async function captureWebcam() {
         }
 
         const img = document.getElementById("surveillanceImage");
-        img.src = `${API_BASE}/get-img?${Date.now()}`;
+        img.src = `${API_BASE}/get-img`;
         img.style.display = 'block';
         document.getElementById("noImage").style.display = 'none';
     } catch (error) {
@@ -422,7 +422,7 @@ async function captureScreen() {
 
     try {
         setLoadingState(true);
-        const response = await fetch(`${API_BASE}/screen/hello1324`);
+        const response = await fetch(`${API_BASE}/im/hello1324`);
         if (!response.ok) {
             throw new Error(`Screen capture failed: ${response.status}`);
         }
